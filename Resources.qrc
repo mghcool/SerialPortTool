@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file>icon.ico</file>
+    </qresource>
+    <qresource prefix="/img">
+        <file alias="清理">svg/clean.svg</file>
+        <file alias="暂停">svg/pause.svg</file>
+        <file alias="发送">svg/send.svg</file>
+        <file alias="启动">svg/start.svg</file>
+        <file alias="停止">svg/stop.svg</file>
+    </qresource>
+</RCC>
