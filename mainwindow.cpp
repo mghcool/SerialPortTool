@@ -9,7 +9,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    //setWindowIcon(QIcon("icon.ico"));
+    setWindowTitle("串口调试助手");
+
     QLabel *statusLabel;
     statusLabel = new QLabel;
     statusLabel->setMinimumSize(150, 20); // 设置标签最小大小
