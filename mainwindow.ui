@@ -492,6 +492,8 @@ QToolButton#btnSend:hover{
    <addaction name="pause"/>
    <addaction name="stop"/>
    <addaction name="clean"/>
+   <addaction name="CRC"/>
+   <addaction name="CMD"/>
   </widget>
   <action name="start">
    <property name="checkable">
@@ -539,6 +541,30 @@ QToolButton#btnSend:hover{
    </property>
    <property name="text">
     <string>清理</string>
+   </property>
+  </action>
+  <action name="CRC">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/img/CRC</normaloff>:/img/CRC</iconset>
+   </property>
+   <property name="text">
+    <string>CRC校验</string>
+   </property>
+   <property name="toolTip">
+    <string>CRC校验</string>
+   </property>
+  </action>
+  <action name="CMD">
+   <property name="icon">
+    <iconset resource="Resources.qrc">
+     <normaloff>:/img/CMD</normaloff>:/img/CMD</iconset>
+   </property>
+   <property name="text">
+    <string>快捷指令</string>
+   </property>
+   <property name="toolTip">
+    <string>快捷指令</string>
    </property>
   </action>
  </widget>

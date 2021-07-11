@@ -8,5 +8,7 @@
         <file alias="发送">svg/send.svg</file>
         <file alias="启动">svg/start.svg</file>
         <file alias="停止">svg/stop.svg</file>
+        <file alias="CRC">svg/crc.svg</file>
+        <file alias="CMD">svg/cmd.svg</file>
     </qresource>
 </RCC>
