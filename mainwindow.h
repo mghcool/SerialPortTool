@@ -15,7 +15,21 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+
+    void on_pause_triggered(bool checked);
+
+    void on_start_triggered(bool checked);
+
+    void on_stop_triggered(bool checked);
+
+    void on_btnSend_clicked();
+
+    void Read_Data();
+
 private:
     Ui::MainWindow *ui;
+
+    void GetPortList();
 };
 #endif // MAINWINDOW_H

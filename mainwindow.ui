@@ -12,12 +12,16 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>650</width>
+    <width>930</width>
     <height>550</height>
    </size>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>串口调试助手</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="Resources.qrc">
+    <normaloff>:/icon/icon.ico</normaloff>:/icon/icon.ico</iconset>
   </property>
   <property name="documentMode">
    <bool>false</bool>
@@ -40,7 +44,7 @@
       <rect>
        <x>10</x>
        <y>21</y>
-       <width>36</width>
+       <width>50</width>
        <height>16</height>
       </rect>
      </property>
@@ -59,7 +63,7 @@
       <rect>
        <x>10</x>
        <y>105</y>
-       <width>36</width>
+       <width>50</width>
        <height>16</height>
       </rect>
      </property>
@@ -72,7 +76,7 @@
       <rect>
        <x>10</x>
        <y>77</y>
-       <width>36</width>
+       <width>50</width>
        <height>16</height>
       </rect>
      </property>
@@ -85,7 +89,7 @@
       <rect>
        <x>10</x>
        <y>49</y>
-       <width>36</width>
+       <width>50</width>
        <height>16</height>
       </rect>
      </property>
@@ -98,7 +102,7 @@
       <rect>
        <x>10</x>
        <y>133</y>
-       <width>36</width>
+       <width>50</width>
        <height>16</height>
       </rect>
      </property>
@@ -111,7 +115,7 @@
       <rect>
        <x>10</x>
        <y>161</y>
-       <width>36</width>
+       <width>50</width>
        <height>16</height>
       </rect>
      </property>
@@ -124,7 +128,7 @@
       <rect>
        <x>70</x>
        <y>20</y>
-       <width>120</width>
+       <width>135</width>
        <height>20</height>
       </rect>
      </property>
@@ -134,7 +138,7 @@
       <rect>
        <x>70</x>
        <y>104</y>
-       <width>120</width>
+       <width>135</width>
        <height>20</height>
       </rect>
      </property>
@@ -169,7 +173,7 @@
       <rect>
        <x>70</x>
        <y>48</y>
-       <width>120</width>
+       <width>135</width>
        <height>20</height>
       </rect>
      </property>
@@ -219,7 +223,7 @@
       <rect>
        <x>70</x>
        <y>76</y>
-       <width>120</width>
+       <width>135</width>
        <height>20</height>
       </rect>
      </property>
@@ -249,7 +253,7 @@
       <rect>
        <x>70</x>
        <y>160</y>
-       <width>120</width>
+       <width>135</width>
        <height>20</height>
       </rect>
      </property>
@@ -274,7 +278,7 @@
       <rect>
        <x>70</x>
        <y>132</y>
-       <width>120</width>
+       <width>135</width>
        <height>20</height>
       </rect>
      </property>
@@ -310,7 +314,7 @@
     <widget class="QRadioButton" name="radioRxHex">
      <property name="geometry">
       <rect>
-       <x>119</x>
+       <x>110</x>
        <y>25</y>
        <width>71</width>
        <height>21</height>
@@ -325,12 +329,20 @@
       <rect>
        <x>10</x>
        <y>25</y>
-       <width>53</width>
+       <width>71</width>
        <height>16</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <italic>false</italic>
+      </font>
+     </property>
      <property name="text">
       <string>ASCII</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
     <widget class="QCheckBox" name="cbxWordWrap">
@@ -338,7 +350,7 @@
       <rect>
        <x>10</x>
        <y>51</y>
-       <width>71</width>
+       <width>101</width>
        <height>16</height>
       </rect>
      </property>
@@ -349,9 +361,9 @@
     <widget class="QCheckBox" name="cbxShowTime">
      <property name="geometry">
       <rect>
-       <x>119</x>
+       <x>110</x>
        <y>77</y>
-       <width>71</width>
+       <width>91</width>
        <height>16</height>
       </rect>
      </property>
@@ -364,7 +376,7 @@
       <rect>
        <x>10</x>
        <y>77</y>
-       <width>71</width>
+       <width>91</width>
        <height>16</height>
       </rect>
      </property>
@@ -388,9 +400,9 @@
     <widget class="QRadioButton" name="radioTxHex">
      <property name="geometry">
       <rect>
-       <x>119</x>
+       <x>110</x>
        <y>33</y>
-       <width>41</width>
+       <width>71</width>
        <height>16</height>
       </rect>
      </property>
@@ -432,7 +444,7 @@
       <rect>
        <x>10</x>
        <y>58</y>
-       <width>41</width>
+       <width>71</width>
        <height>16</height>
       </rect>
      </property>
@@ -443,14 +455,17 @@
     <widget class="QCheckBox" name="cbxCRCExchange">
      <property name="geometry">
       <rect>
-       <x>119</x>
-       <y>58</y>
-       <width>95</width>
+       <x>100</x>
+       <y>60</y>
+       <width>121</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
       <string>高低字节交换</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
     </widget>
     <widget class="QComboBox" name="cmbCRCType">
@@ -573,7 +588,7 @@
       <rect>
        <x>10</x>
        <y>120</y>
-       <width>71</width>
+       <width>91</width>
        <height>16</height>
       </rect>
      </property>
@@ -586,12 +601,15 @@
       <rect>
        <x>10</x>
        <y>33</y>
-       <width>53</width>
+       <width>71</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
       <string>ASCII</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
@@ -686,6 +704,9 @@ QToolButton#btnSend:hover{
    </property>
    <property name="windowTitle">
     <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
    </property>
    <property name="iconSize">
     <size>
