@@ -27,9 +27,12 @@ private slots:
 
     void Read_Data();
 
+    void on_timeout_UpdatePort();
+
 private:
     Ui::MainWindow *ui;
+    QTimer *timerUpdatePort;
 
-    void GetPortList();
+    void UpdatePortList();
 };
 #endif // MAINWINDOW_H

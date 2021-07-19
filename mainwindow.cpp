@@ -4,6 +4,7 @@
 #include <QSerialPortInfo>    //提供系统中存在的串口的信息
 #include <QMessageBox>
 #include <QDebug>
+#include <QTimer>
 #include "crc.h"
 
 
@@ -38,32 +39,46 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) , ui(new Ui::MainW
     ui->comBaudRate->setCurrentIndex(3);
     ui->comDataBits->setCurrentIndex(3);
     ui->stop->setChecked(true);
-    this->GetPortList();
-    foreach (const QSerialPortInfo &info, portList)
-    {
-        ui->cmbSerialPort->addItem(info.portName() + " " + info.description());
-    }
 
-    //连接接收信号槽
+    //更新串口列表
+    UpdatePortList();
+
+    //定义串口更新定时器
+    timerUpdatePort = new QTimer(this);
+    timerUpdatePort->start(1000);
+
+    //连接信号槽
     connect(&serial, &QSerialPort::readyRead, this, &MainWindow::Read_Data);
+    connect(timerUpdatePort, SIGNAL(timeout()), this, SLOT(on_timeout_UpdatePort()));
 }
 
 //窗体析构
 MainWindow::~MainWindow()
 {
     serial.close();
+    delete timerUpdatePort;
     delete ui;
 }
 
-void RadioRx_Clicked()
+//更新串口列表
+void MainWindow::UpdatePortList()
 {
-    qDebug() << "sss";
+    QList<QSerialPortInfo> newList = QSerialPortInfo::availablePorts();
+    if(portList.size() != newList.size())
+    {
+        portList = newList;
+        ui->cmbSerialPort->clear();
+        foreach (const QSerialPortInfo &info, portList)
+        {
+            ui->cmbSerialPort->addItem(info.portName() + " " + info.description());
+        }
+    }
 }
 
-//获取串口列表
-void MainWindow::GetPortList()
+//串口更新定时器触发
+void MainWindow::on_timeout_UpdatePort()
 {
-    portList = QSerialPortInfo::availablePorts();
+    UpdatePortList();
 }
 
 //打开串口
@@ -180,16 +195,26 @@ void MainWindow::on_btnSend_clicked()
 //读取接收到的数据
 void MainWindow::Read_Data()
 {
-    if(ui->pause->isChecked()) return;
+    if(ui->pause->isChecked()) return;  //暂停时不处理接收
     QByteArray buf;
     buf = serial.readAll();
     if(!buf.isEmpty())
     {
-        QString str = ui->textShowRx->toPlainText();
-        if(ui->radioRxHex->isChecked()) str += buf.toHex();
-        else str += buf;
-        ui->textShowRx->clear();
-        ui->textShowRx->append(str);
+        QString str = QString::fromLocal8Bit(buf);  //支持中文
+
+        if(ui->radioRxHex->isChecked())
+            str = buf.toHex(' ').toUpper(); //转16进制显示，带空格大写
+
+        if(ui->cbxWordWrap->isChecked())//换行显示
+        {
+            ui->textShowRx->append(str);
+        }
+        else                            //不换行显示
+        {
+            QTextCursor tc = ui->textShowRx->textCursor();
+            tc.movePosition(QTextCursor::End);
+            tc.insertText(str + " ");
+        }
     }
     buf.clear();
 }
