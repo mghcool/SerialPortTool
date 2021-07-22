@@ -27,9 +27,9 @@ private slots:
 
     void on_btnSend_clicked();
 
-    void Read_Data();
+    void slot_PortReceive();
 
-    void on_timeout_UpdatePort();
+    void slot_UpdatePort();
 
 private:
     Ui::MainWindow *ui;

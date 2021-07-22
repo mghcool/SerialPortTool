@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QSerialPort>        //提供访问串口的功能
-#include <QSerialPortInfo>    //提供系统中存在的串口的信息
+#include <QSerialPort>
+#include <QSerialPortInfo>
 #include <QMessageBox>
 #include <QDebug>
 #include <QTimer>
@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) , ui(new Ui::MainW
     ui->statusbar->addWidget(lblStatus);
     lblStatus->setMinimumWidth(500);
     lblStatus->setMaximumWidth(500);
+    lblStatus->setStyleSheet("color:red;");
     lblStatus->setText(" 未打开串口");
 
     //创建接收和发送字节数标签
@@ -55,8 +56,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) , ui(new Ui::MainW
     timerUpdatePort->start(1000);
 
     //连接信号槽
-    connect(&serial, &QSerialPort::readyRead, this, &MainWindow::Read_Data);
-    connect(timerUpdatePort, SIGNAL(timeout()), this, SLOT(on_timeout_UpdatePort()));
+    connect(&serial, SIGNAL(readyRead()), this, SLOT(slot_PortReceive()));
+    connect(timerUpdatePort, SIGNAL(timeout()), this, SLOT(slot_UpdatePort()));
 }
 
 //窗体析构
@@ -84,7 +85,7 @@ void MainWindow::UpdatePortList()
 }
 
 //串口更新定时器触发
-void MainWindow::on_timeout_UpdatePort()
+void MainWindow::slot_UpdatePort()
 {
     UpdatePortList();
 }
@@ -139,12 +140,25 @@ void MainWindow::on_start_triggered(bool checked)
         //打开串口
         if(serial.open(QIODevice::ReadWrite))
         {
-            QString text = " 串口打开：" + ui->cmbSerialPort->currentText();
+            QString text = " 串口打开："
+                    + ui->cmbSerialPort->currentText()
+                    + " "
+                    + ui->comBaudRate->currentText();
+            lblStatus->setStyleSheet("color:green;");
             lblStatus->setText(text);
         }
         else
         {
-            QMessageBox::warning(this, "错误", "没有相应的串口！", QMessageBox::Ok);
+            switch (serial.error()) {
+            case QSerialPort::PermissionError:
+                QMessageBox::warning(this, "错误", "串口被占用！", QMessageBox::Ok);
+                break;
+            case QSerialPort::OpenError:
+                QMessageBox::warning(this, "错误", "无法打开串口", QMessageBox::Ok);
+                break;
+            default:
+                QMessageBox::warning(this, "错误", "打开串口错误！", QMessageBox::Ok);
+            }
             serial.clearError();
             ui->start->setChecked(false);
             ui->pause->setChecked(false);
@@ -175,47 +189,54 @@ void MainWindow::on_stop_triggered(bool checked)
     if(checked)
     {
         serial.close();
-        lblStatus->setText(tr("未打开串口"));
+        lblStatus->setStyleSheet("color:red;");
+        lblStatus->setText(tr(" 未打开串口"));
     }
 }
 
 //发送一条信息
 void MainWindow::on_btnSend_clicked()
 {
-    QByteArray sData;
+    //如果串口没有打开，那就打开串口
+    if(!ui->start->isChecked())
+    {
+        on_start_triggered(true);
+        return;
+    }
     //获取输入窗口sendData的数据
-    QString Data = ui->textEditTx->toPlainText();
+    QString inputText = ui->textEditTx->toPlainText();
     //转换数据
-    if(ui->radioTxAscii->isChecked()) sData = Data.toUtf8();   //按Ascii发送
-    else sData = QByteArray::fromHex (Data.toLatin1().data()); //按Hex发送
+    QByteArray sendData;
+    if(ui->radioTxAscii->isChecked()) sendData = inputText.toUtf8();   //按Ascii发送
+    else sendData = QByteArray::fromHex (inputText.toLatin1().data()); //按Hex发送
     //CRC校验
     if(ui->cbxCRC->isChecked())
     {
-        quint32 crcVal = crcObj.computeCrcVal(sData, ui->cmbCRCType->currentIndex());
+        quint32 crcVal = crcObj.computeCrcVal(sendData, ui->cmbCRCType->currentIndex());
         if(ui->cbxCRCExchange->isChecked())
         {
-            sData.append(crcVal & 0x00FF);
-            sData.append(crcVal >> 8);
+            sendData.append(crcVal & 0x00FF);
+            sendData.append(crcVal >> 8);
         }
         else
         {
-            sData.append(crcVal >> 8);
-            sData.append(crcVal & 0x00FF);
+            sendData.append(crcVal >> 8);
+            sendData.append(crcVal & 0x00FF);
         }
     }
     // 写入发送缓存区
-    serial.write(sData);
+    serial.write(sendData);
     //添加到历史区
-    if(ui->cmbSendHistory->itemText(0) != Data)
+    if(ui->cmbSendHistory->itemText(0) != inputText)
     {
-        ui->cmbSendHistory->insertItem(0, Data);
+        ui->cmbSendHistory->insertItem(0, inputText);
         ui->cmbSendHistory->setCurrentIndex(0);
     }
 }
 
 
 //读取接收到的数据
-void MainWindow::Read_Data()
+void MainWindow::slot_PortReceive()
 {
     if(ui->pause->isChecked()) return;  //暂停时不处理接收
     QByteArray buf;
