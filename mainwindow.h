@@ -23,6 +23,8 @@ private slots:
 
     void on_stop_triggered(bool checked);
 
+    void on_clean_triggered();
+
     void on_btnSend_clicked();
 
     void Read_Data();

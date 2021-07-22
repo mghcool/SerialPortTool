@@ -5,7 +5,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QTimer>
-#include "crc.h"
+#include "crccheck.h"
 
 
 QSerialPort serial;             //串口对象
@@ -13,6 +13,7 @@ QList<QSerialPortInfo> portList;//串口列表
 QLabel *lblStatus;             //状态栏状态标签
 QLabel *lblRxByte;             //状态栏接收字节标签
 QLabel *lblTxByte;             //状态栏发送字节标签
+CrcCheck crcObj;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) , ui(new Ui::MainWindow)
 {
@@ -40,6 +41,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) , ui(new Ui::MainW
     ui->comDataBits->setCurrentIndex(3);
     ui->stop->setChecked(true);
 
+    //添加crc选项
+    for(int i = 0; i < crcObj.modelListSize; i++)
+    {
+        ui->cmbCRCType->addItem(crcObj.modelList[i].name);
+    }
+
     //更新串口列表
     UpdatePortList();
 
@@ -56,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) , ui(new Ui::MainW
 MainWindow::~MainWindow()
 {
     serial.close();
+    timerUpdatePort->stop();
     delete timerUpdatePort;
     delete ui;
 }
@@ -94,15 +102,11 @@ void MainWindow::on_start_triggered(bool checked)
         ui->pause->setChecked(false);
         ui->stop->setChecked(true);
         QMessageBox::warning(this, "错误", "没有相应的串口！", QMessageBox::Ok);
-        qDebug("\033[31m"); //qDebug设置成红色
-        qDebug()  << "Error:没有可用串口";
-        qDebug("\033[30m"); //qDebug设置成黑色
         return;
     }
 
     if(checked)
     {
-        qDebug() << "start:" << ui->cmbSerialPort->currentText();
         //设置串口名
         serial.setPortName(portList[ui->cmbSerialPort->currentIndex()].portName());
         //设置波特率
@@ -141,9 +145,6 @@ void MainWindow::on_start_triggered(bool checked)
         else
         {
             QMessageBox::warning(this, "错误", "没有相应的串口！", QMessageBox::Ok);
-            qDebug("\033[31m"); //qDebug设置成红色
-            qDebug()  << "Error:" << serial.error();//打印错误码
-            qDebug("\033[30m"); //qDebug设置成黑色
             serial.clearError();
             ui->start->setChecked(false);
             ui->pause->setChecked(false);
@@ -173,7 +174,6 @@ void MainWindow::on_stop_triggered(bool checked)
     ui->stop->setChecked(true);
     if(checked)
     {
-        qDebug() << "stop";
         serial.close();
         lblStatus->setText(tr("未打开串口"));
     }
@@ -185,10 +185,32 @@ void MainWindow::on_btnSend_clicked()
     QByteArray sData;
     //获取输入窗口sendData的数据
     QString Data = ui->textEditTx->toPlainText();
+    //转换数据
     if(ui->radioTxAscii->isChecked()) sData = Data.toUtf8();   //按Ascii发送
     else sData = QByteArray::fromHex (Data.toLatin1().data()); //按Hex发送
+    //CRC校验
+    if(ui->cbxCRC->isChecked())
+    {
+        quint32 crcVal = crcObj.computeCrcVal(sData, ui->cmbCRCType->currentIndex());
+        if(ui->cbxCRCExchange->isChecked())
+        {
+            sData.append(crcVal & 0x00FF);
+            sData.append(crcVal >> 8);
+        }
+        else
+        {
+            sData.append(crcVal >> 8);
+            sData.append(crcVal & 0x00FF);
+        }
+    }
     // 写入发送缓存区
     serial.write(sData);
+    //添加到历史区
+    if(ui->cmbSendHistory->itemText(0) != Data)
+    {
+        ui->cmbSendHistory->insertItem(0, Data);
+        ui->cmbSendHistory->setCurrentIndex(0);
+    }
 }
 
 
@@ -217,4 +239,10 @@ void MainWindow::Read_Data()
         }
     }
     buf.clear();
+}
+
+//清理接收区
+void MainWindow::on_clean_triggered()
+{
+    ui->textShowRx->clear();
 }
